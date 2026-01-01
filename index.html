@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#121212">
+    <meta name="description" content="SSC Solo Leveling System - Discipline-based exam preparation tracker">
+    <title>SSC Solo Leveling System</title>
+    <link rel="manifest" href="/manifest.json">
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="nav-container">
+            <div class="nav-brand">SSC Solo Leveling</div>
+            <div class="nav-links">
+                <button class="nav-link active" data-page="dashboard">Dashboard</button>
+                <button class="nav-link" data-page="study">Study</button>
+                <button class="nav-link" data-page="mock">Mock Test</button>
+                <button class="nav-link" data-page="quests">Quests</button>
+                <button class="nav-link" data-page="report">Report</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Dashboard Page -->
+        <div id="page-dashboard" class="page active">
+            <div class="container">
+                <!-- Awakening Modal (First Time) -->
+                <div id="awakening-modal" class="modal" style="display: none;">
+                    <div class="modal-content modal-lg">
+                        <h2>Awakening</h2>
+                        <div id="awakening-step-1">
+                            <p class="awakening-text">You've decided to prepare for SSC. But why?</p>
+                            <p class="awakening-text">This moment will define whether you succeed or become another statistic.</p>
+                            <p class="awakening-text">What do you see in your future if you crack this exam?</p>
+                            <textarea id="vision-input" class="awakening-textarea" placeholder="Describe your vision after selection... (minimum 100 characters)" rows="6"></textarea>
+                            <button id="vision-next-btn" class="btn btn-primary">Next</button>
+                        </div>
+                        <div id="awakening-step-2" style="display: none;">
+                            <p class="awakening-text">Now face the alternative.</p>
+                            <p class="awakening-text">What happens if you don't make it? What does failure look like?</p>
+                            <p class="awakening-text">The wasted years. The regret. The compromise.</p>
+                            <textarea id="anti-vision-input" class="awakening-textarea" placeholder="Describe what you fear if you fail... (minimum 100 characters)" rows="6"></textarea>
+                            <button id="awakening-complete-btn" class="btn btn-primary">Begin Journey</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Status Cards -->
+                <div class="grid grid-3">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Hunter Status</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="status-row">
+                                <span class="status-label">Rank</span>
+                                <span class="status-value" id="status-rank">E</span>
+                            </div>
+                            <div class="status-row">
+                                <span class="status-label">Level</span>
+                                <span class="status-value" id="status-level">1</span>
+                            </div>
+                            <div class="status-row">
+                                <span class="status-label">XP</span>
+                                <span class="status-value" id="status-xp">0 / 100</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="xp-progress" style="width: 0%"></div>
+                            </div>
+                            <div class="status-row">
+                                <span class="status-label">Gold</span>
+                                <span class="status-value" id="status-gold">0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Weekly Progress</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="status-row">
+                                <span class="status-label">XP Earned</span>
+                                <span class="status-value" id="weekly-xp">0</span>
+                            </div>
+                            <div class="status-row">
+                                <span class="status-label">Cap</span>
+                                <span class="status-value" id="weekly-cap">800</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="weekly-progress" style="width: 0%"></div>
+                            </div>
+                            <div class="status-row">
+                                <span class="status-label">Rollover</span>
+                                <span class="status-value" id="weekly-rollover">0 / 50</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Streaks & Protection</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="status-row">
+                                <span class="status-label">Study Streak</span>
+                                <span class="status-value" id="study-streak">0 days</span>
+                            </div>
+                            <div class="status-row">
+                                <span class="status-label">Failure Streak</span>
+                                <span class="status-value danger" id="failure-streak">0</span>
+                            </div>
+                            <div class="status-row">
+                                <span class="status-label">Protection</span>
+                                <span class="status-value" id="protection-status">None</span>
+                            </div>
+                            <div class="status-row">
+                                <span class="status-label">Grace Days</span>
+                                <span class="status-value" id="grace-days">1 available</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Readiness Index -->
+                <div class="card" id="readiness-card">
+                    <div class="card-header">
+                        <h3>Preparation Readiness Index</h3>
+                    </div>
+                    <div class="card-body">
+                        <div id="readiness-content"></div>
+                    </div>
+                </div>
+
+                <!-- Skills -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Skills</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="grid grid-2">
+                            <div class="skill-item">
+                                <div class="skill-header">
+                                    <span>Quantitative Aptitude</span>
+                                    <span id="skill-quant">0 XP</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" id="skill-quant-progress" style="width: 0%"></div>
+                                </div>
+                            </div>
+                            <div class="skill-item">
+                                <div class="skill-header">
+                                    <span>Reasoning</span>
+                                    <span id="skill-reasoning">0 XP</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" id="skill-reasoning-progress" style="width: 0%"></div>
+                                </div>
+                            </div>
+                            <div class="skill-item">
+                                <div class="skill-header">
+                                    <span>English</span>
+                                    <span id="skill-english">0 XP</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" id="skill-english-progress" style="width: 0%"></div>
+                                </div>
+                            </div>
+                            <div class="skill-item">
+                                <div class="skill-header">
+                                    <span>General Knowledge</span>
+                                    <span id="skill-gk">0 XP</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" id="skill-gk-progress" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Habits -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Habits Tracking</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="grid grid-2">
+                            <div class="habit-item">
+                                <span>Daily Study</span>
+                                <span id="habit-daily-study">0 days</span>
+                            </div>
+                            <div class="habit-item">
+                                <span>Daily Revision</span>
+                                <span id="habit-daily-revision">0 days</span>
+                            </div>
+                            <div class="habit-item">
+                                <span>Weekly Mock</span>
+                                <span id="habit-weekly-mock">0 weeks</span>
+                            </div>
+                            <div class="habit-item">
+                                <span>Formula Review</span>
+                                <span id="habit-formula-review">0 days</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Recent Activity</h3>
+                    </div>
+                    <div class="card-body">
+                        <div id="recent-activity"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Study Page -->
+        <div id="page-study" class="page">
+            <div class="container">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 id="study-title">Start Study Session</h3>
+                    </div>
+                    <div class="card-body">
+                        <!-- Intent Form -->
+                        <div id="study-intent-form">
+                            <div class="form-group">
+                                <label>Subject</label>
+                                <select id="study-subject" class="form-control">
+                                    <option value="">Select Subject</option>
+                                    <option value="quant">Quantitative Aptitude</option>
+                                    <option value="reasoning">Reasoning</option>
+                                    <option value="english">English</option>
+                                    <option value="gk">General Knowledge</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Topic</label>
+                                <input type="text" id="study-topic" class="form-control" placeholder="e.g., Algebra - Quadratic Equations">
+                            </div>
+                            <div class="form-group">
+                                <label>Phase</label>
+                                <select id="study-phase" class="form-control">
+                                    <option value="">Select Phase</option>
+                                    <option value="learning">Learning (New Concept)</option>
+                                    <option value="revision">Revision</option>
+                                    <option value="mock-analysis">Mock Analysis</option>
+                                </select>
+                            </div>
+                            <button id="start-study-btn" class="btn btn-primary">Start Session</button>
+                        </div>
+
+                        <!-- Active Session -->
+                        <div id="study-active-session" style="display: none;">
+                            <div class="session-info">
+                                <div class="session-detail">
+                                    <span class="label">Subject:</span>
+                                    <span id="session-subject"></span>
+                                </div>
+                                <div class="session-detail">
+                                    <span class="label">Topic:</span>
+                                    <span id="session-topic"></span>
+                                </div>
+                                <div class="session-detail">
+                                    <span class="label">Phase:</span>
+                                    <span id="session-phase"></span>
+                                </div>
+                            </div>
+                            <div class="timer-display">
+                                <div class="timer-value" id="timer-display">00:00:00</div>
+                                <div class="timer-status" id="timer-status">Session active</div>
+                            </div>
+                            <button id="complete-study-btn" class="btn btn-primary">Complete Session</button>
+                        </div>
+
+                        <!-- Evidence Form -->
+                        <div id="study-evidence-form" style="display: none;">
+                            <h4>Evidence Submission</h4>
+                            <p class="form-hint" id="evidence-requirement"></p>
+                            
+                            <div id="evidence-photo-section">
+                                <div class="form-group">
+                                    <label>Capture Live Photo (Primary Evidence)</label>
+                                    <input type="file" id="evidence-photo" class="form-control" accept="image/*" capture="environment">
+                                    <div id="photo-preview" class="photo-preview"></div>
+                                </div>
+                                <div class="divider">OR</div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Affirmation (Fallback - Reduced Rewards)</label>
+                                <textarea id="evidence-affirmation" class="form-control" rows="3" placeholder="Describe what you studied... (minimum 50 characters)"></textarea>
+                                <div class="form-hint warning">Using affirmation: -50% Gold, counts toward weekly limit (3/week)</div>
+                                <div id="affirmation-count-warning" class="form-hint danger" style="display: none;"></div>
+                            </div>
+
+                            <button id="submit-evidence-btn" class="btn btn-primary">Submit Evidence</button>
+                            <button id="cancel-study-btn" class="btn btn-secondary">Cancel Session</button>
+                        </div>
+
+                        <!-- Notes & Reflection Form -->
+                        <div id="study-reflection-form" style="display: none;">
+                            <h4>Session Notes & Reflection</h4>
+                            
+                            <div class="form-group">
+                                <label>Study Notes</label>
+                                <textarea id="study-notes" class="form-control" rows="4" placeholder="Key points, formulas, insights... (minimum 30 characters)"></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Difficulty Level</label>
+                                <select id="study-difficulty" class="form-control">
+                                    <option value="very-easy">Very Easy</option>
+                                    <option value="easy">Easy</option>
+                                    <option value="moderate" selected>Moderate</option>
+                                    <option value="hard">Hard</option>
+                                    <option value="very-hard">Very Hard</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Mistakes/Challenges</label>
+                                <textarea id="study-mistakes" class="form-control" rows="3" placeholder="What went wrong? What was confusing?"></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Revision Needed?</label>
+                                <select id="study-revision-needed" class="form-control">
+                                    <option value="no">No</option>
+                                    <option value="yes">Yes</option>
+                                    <option value="urgent">Urgent</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Confidence Rating</label>
+                                <select id="study-confidence" class="form-control">
+                                    <option value="very-weak">Very Weak</option>
+                                    <option value="weak">Weak</option>
+                                    <option value="moderate" selected>Moderate</option>
+                                    <option value="good">Good</option>
+                                    <option value="strong">Strong</option>
+                                </select>
+                            </div>
+
+                            <button id="submit-reflection-btn" class="btn btn-primary">Complete Study Session</button>
+                        </div>
+
+                        <!-- Success Message -->
+                        <div id="study-success" style="display: none;">
+                            <div class="success-message">
+                                <h3>Session Complete</h3>
+                                <div class="reward-display">
+                                    <div class="reward-item">
+                                        <span class="reward-label">XP Earned:</span>
+                                        <span class="reward-value" id="earned-xp">0</span>
+                                    </div>
+                                    <div class="reward-item">
+                                        <span class="reward-label">Gold Earned:</span>
+                                        <span class="reward-value" id="earned-gold">0</span>
+                                    </div>
+                                    <div class="reward-item">
+                                        <span class="reward-label">Time:</span>
+                                        <span class="reward-value" id="earned-time">0 min</span>
+                                    </div>
+                                </div>
+                                <button id="new-study-btn" class="btn btn-primary">Start New Session</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mock Test Page -->
+        <div id="page-mock" class="page">
+            <div class="container">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Mock Test</h3>
+                    </div>
+                    <div class="card-body">
+                        <!-- Mock Intent -->
+                        <div id="mock-intent-form">
+                            <div class="form-group">
+                                <label>Mock Type</label>
+                                <select id="mock-type" class="form-control">
+                                    <option value="">Select Type</option>
+                                    <option value="sectional">Sectional Mock (18+ min)</option>
+                                    <option value="full">Full Mock (60+ min)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Subject (For Sectional)</label>
+                                <select id="mock-subject" class="form-control" disabled>
+                                    <option value="">Select Subject</option>
+                                    <option value="quant">Quantitative Aptitude</option>
+                                    <option value="reasoning">Reasoning</option>
+                                    <option value="english">English</option>
+                                    <option value="gk">General Knowledge</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Source/Platform</label>
+                                <input type="text" id="mock-source" class="form-control" placeholder="e.g., Adda247, Testbook, SSC CGL 2023">
+                            </div>
+                            <button id="start-mock-btn" class="btn btn-primary">Start Mock Test</button>
+                        </div>
+
+                        <!-- Mock Active -->
+                        <div id="mock-active-session" style="display: none;">
+                            <div class="session-info">
+                                <div class="session-detail">
+                                    <span class="label">Type:</span>
+                                    <span id="mock-session-type"></span>
+                                </div>
+                                <div class="session-detail" id="mock-session-subject-row">
+                                    <span class="label">Subject:</span>
+                                    <span id="mock-session-subject"></span>
+                                </div>
+                                <div class="session-detail">
+                                    <span class="label">Source:</span>
+                                    <span id="mock-session-source"></span>
+                                </div>
+                            </div>
+                            <div class="timer-display">
+                                <div class="timer-value" id="mock-timer-display">00:00:00</div>
+                                <div class="timer-status">Mock test in progress</div>
+                            </div>
+                            <button id="complete-mock-btn" class="btn btn-primary">Complete Mock</button>
+                        </div>
+
+                        <!-- Mock Evidence -->
+                        <div id="mock-evidence-form" style="display: none;">
+                            <h4>Submit Score Screenshot</h4>
+                            <p class="form-hint danger">Screenshot is MANDATORY for mock tests</p>
+                            
+                            <div class="form-group">
+                                <label>Upload Screenshot</label>
+                                <input type="file" id="mock-screenshot" class="form-control" accept="image/*">
+                                <div id="mock-screenshot-preview" class="photo-preview"></div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Score/Accuracy (%)</label>
+                                <input type="number" id="mock-score" class="form-control" min="0" max="100" placeholder="e.g., 78.5">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Total Questions</label>
+                                <input type="number" id="mock-total-questions" class="form-control" min="1" placeholder="e.g., 100">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Correct Answers</label>
+                                <input type="number" id="mock-correct" class="form-control" min="0" placeholder="e.g., 78">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Analysis Notes</label>
+                                <textarea id="mock-analysis" class="form-control" rows="4" placeholder="Key mistakes, weak areas, time management issues..."></textarea>
+                            </div>
+
+                            <button id="submit-mock-btn" class="btn btn-primary">Submit Mock Test</button>
+                            <button id="cancel-mock-btn" class="btn btn-secondary">Cancel</button>
+                        </div>
+
+                        <!-- Mock Success -->
+                        <div id="mock-success" style="display: none;">
+                            <div class="success-message">
+                                <h3>Mock Test Complete</h3>
+                                <div class="reward-display">
+                                    <div class="reward-item">
+                                        <span class="reward-label">XP Earned:</span>
+                                        <span class="reward-value" id="mock-earned-xp">0</span>
+                                    </div>
+                                    <div class="reward-item">
+                                        <span class="reward-label">Gold Earned:</span>
+                                        <span class="reward-value" id="mock-earned-gold">0</span>
+                                    </div>
+                                    <div class="reward-item">
+                                        <span class="reward-label">Protection:</span>
+                                        <span class="reward-value" id="mock-protection">None</span>
+                                    </div>
+                                </div>
+                                <button id="new-mock-btn" class="btn btn-primary">Start New Mock</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quests Page -->
+        <div id="page-quests" class="page">
+            <div class="container">
+                <!-- Daily Quest -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Daily Quest</h3>
+                    </div>
+                    <div class="card-body">
+                        <div id="daily-quest-content"></div>
+                    </div>
+                </div>
+
+                <!-- Rewards Shop -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Rewards</h3>
+                        <div class="card-header-right">
+                            <span class="gold-display">Gold: <span id="rewards-gold">0</span></span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="rewards-grid">
+                            <div class="reward-card">
+                                <h4>Extra Study Break</h4>
+                                <p>15 minutes guilt-free break</p>
+                                <div class="reward-footer">
+                                    <span class="reward-cost">50 Gold</span>
+                                    <button class="btn btn-small btn-primary" data-reward="break" data-cost="50">Claim</button>
+                                </div>
+                            </div>
+                            <div class="reward-card">
+                                <h4>Movie Night</h4>
+                                <p>Enjoy a movie without guilt</p>
+                                <div class="reward-footer">
+                                    <span class="reward-cost">150 Gold</span>
+                                    <button class="btn btn-small btn-primary" data-reward="movie" data-cost="150">Claim</button>
+                                </div>
+                            </div>
+                            <div class="reward-card">
+                                <h4>Cheat Meal</h4>
+                                <p>Your favorite food, earned</p>
+                                <div class="reward-footer">
+                                    <span class="reward-cost">100 Gold</span>
+                                    <button class="btn btn-small btn-primary" data-reward="meal" data-cost="100">Claim</button>
+                                </div>
+                            </div>
+                            <div class="reward-card">
+                                <h4>Full Day Off</h4>
+                                <p>Complete rest day (no decay)</p>
+                                <div class="reward-footer">
+                                    <span class="reward-cost">500 Gold</span>
+                                    <button class="btn btn-small btn-primary" data-reward="dayoff" data-cost="500">Claim</button>
+                                </div>
+                            </div>
+                            <div class="reward-card">
+                                <h4>Social Outing</h4>
+                                <p>Hang out with friends</p>
+                                <div class="reward-footer">
+                                    <span class="reward-cost">200 Gold</span>
+                                    <button class="btn btn-small btn-primary" data-reward="social" data-cost="200">Claim</button>
+                                </div>
+                            </div>
+                            <div class="reward-card">
+                                <h4>Gaming Session</h4>
+                                <p>2 hours of gaming, guilt-free</p>
+                                <div class="reward-footer">
+                                    <span class="reward-cost">120 Gold</span>
+                                    <button class="btn btn-small btn-primary" data-reward="gaming" data-cost="120">Claim</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Claimed Rewards History -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Claimed Rewards</h3>
+                    </div>
+                    <div class="card-body">
+                        <div id="claimed-rewards-list"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Report Page -->
+        <div id="page-report" class="page">
+            <div class="container">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Progress Report</h3>
+                        <div class="card-header-right">
+                            <button id="export-pdf-btn" class="btn btn-primary">Export PDF</button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="report-content"></div>
+                    </div>
+                </div>
+
+                <!-- Storage Management -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Storage Management</h3>
+                    </div>
+                    <div class="card-body">
+                        <div id="storage-info"></div>
+                        <button id="cleanup-storage-btn" class="btn btn-secondary">Clean Old Images (90+ days)</button>
+                    </div>
+                </div>
+
+                <!-- Vision Review -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Your Awakening</h3>
+                    </div>
+                    <div class="card-body">
+                        <div id="vision-review"></div>
+                        <button id="edit-vision-btn" class="btn btn-secondary">Edit Vision</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
+    <!-- Scripts -->
+    <script src="/storage.js"></script>
+    <script src="/core.js"></script>
+    <script src="/app.js"></script>
+    <script>
+        // Register service worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/service-worker.js')
+                .then(reg => console.log('Service Worker registered'))
+                .catch(err => console.error('Service Worker registration failed:', err));
+        }
+    </script>
+</body>
+</html>
